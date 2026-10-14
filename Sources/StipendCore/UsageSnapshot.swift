@@ -1,0 +1,96 @@
+import Foundation
+
+/**
+ * 模块：用量快照
+ * 职责：保存三个状态项可展示的数据。
+ * 边界：不包含访问令牌，不发起网络请求。
+ */
+public struct ModelUsage: Equatable, Sendable, Codable {
+    public var name: String
+    public var tokens: Int
+
+    public init(name: String, tokens: Int) {
+        self.name = name
+        self.tokens = tokens
+    }
+}
+
+public struct ModelPool: Equatable, Sendable, Codable {
+    /// 额度百分比。nil 表示这次没有可读百分比，状态栏下行显示 —。
+    public var percent: Int?
+    /// 本期 Tokens。nil 表示聚合请求没有成功，不把 nil 显示成 0。
+    public var periodTokens: Int?
+    public var todayTokens: Int?
+    public var models: [ModelUsage]
+
+    public init(percent: Int?, periodTokens: Int?, todayTokens: Int?, models: [ModelUsage]) {
+        self.percent = percent
+        self.periodTokens = periodTokens
+        self.todayTokens = todayTokens
+        self.models = models
+    }
+
+    public static let empty = ModelPool(percent: nil, periodTokens: nil, todayTokens: nil, models: [])
+}
+
+public enum GrokAllowance: String, Equatable, Sendable, Codable {
+    case included
+    case notIncluded
+    case unknown
+}
+
+public struct GrokBotUsage: Equatable, Sendable, Codable {
+    public var allowance: GrokAllowance
+    public var percent: Int?
+    /// 只有响应给出 nextResetTimestampUtc 时才有值。不要用周期起点加 7 天填这个字段。
+    public var resetAt: Date?
+
+    public init(allowance: GrokAllowance, percent: Int?, resetAt: Date?) {
+        self.allowance = allowance
+        self.percent = percent
+        self.resetAt = resetAt
+    }
+
+    public static let unknown = GrokBotUsage(allowance: .unknown, percent: nil, resetAt: nil)
+}
+
+public struct UsageSnapshot: Equatable, Sendable, Codable {
+    public var cursorModels: ModelPool
+    public var otherModels: ModelPool
+    public var grokBot: GrokBotUsage
+    public var fetchedAt: Date
+    public var cursorStale: Bool
+    public var grokStale: Bool
+
+    public init(
+        cursorModels: ModelPool,
+        otherModels: ModelPool,
+        grokBot: GrokBotUsage,
+        fetchedAt: Date,
+        cursorStale: Bool,
+        grokStale: Bool
+    ) {
+        self.cursorModels = cursorModels
+        self.otherModels = otherModels
+        self.grokBot = grokBot
+        self.fetchedAt = fetchedAt
+        self.cursorStale = cursorStale
+        self.grokStale = grokStale
+    }
+}
+
+public struct PeriodPercents: Equatable, Sendable {
+    public var cursorPercent: Int?
+    public var otherPercent: Int?
+    public var periodStart: Date?
+
+    public init(cursorPercent: Int?, otherPercent: Int?, periodStart: Date?) {
+        self.cursorPercent = cursorPercent
+        self.otherPercent = otherPercent
+        self.periodStart = periodStart
+    }
+}
+
+public enum StipendCoreMarker {
+    public static let productName = "Stipend"
+}
