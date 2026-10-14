@@ -202,16 +202,16 @@ public enum PoolPanelCopy {
 }
 
 public enum ResetCountdown {
-    /// 不足 1 天时向上取整为分钟；达到 1 天时显示天和小时，天数可以为 1 以上，小时是余数。
+    /// 不足 1 天时向上取整为小时和分钟；达到 1 天时显示天和小时，天数可以为 1 以上，小时是余数。
     public static func text(now: Date, resetAt: Date?) -> String {
         guard let resetAt else { return "重置时间未知" }
         let remaining = resetAt.timeIntervalSince(now)
-        if remaining <= 0 { return "0分钟" }
-        if remaining < 24 * 3600 {
-            let minutes = max(1, Int((remaining / 60).rounded(.up)))
-            return "\(minutes)分钟"
+        if remaining <= 0 { return "0小时0分钟" }
+        let minutesTotal = Int((remaining / 60).rounded(.up))
+        if minutesTotal < 24 * 60 {
+            return "\(minutesTotal / 60)小时\(minutesTotal % 60)分钟"
         }
-        let hoursTotal = Int(remaining / 3600)
+        let hoursTotal = max(Int(remaining / 3600), minutesTotal / 60)
         return "\(hoursTotal / 24)天\(hoursTotal % 24)小时"
     }
 }
