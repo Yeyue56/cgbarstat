@@ -3,9 +3,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 swift build -c release
 BIN_DIR="$(swift build -c release --show-bin-path)"
-rm -rf Stipend.app
-mkdir -p Stipend.app/Contents/MacOS Stipend.app/Contents/Resources
-cp "$BIN_DIR/StipendApp" Stipend.app/Contents/MacOS/StipendApp
-cp Support/Info.plist Stipend.app/Contents/Info.plist
-cp Support/AppIcon.icns Stipend.app/Contents/Resources/AppIcon.icns
-chmod +x Stipend.app/Contents/MacOS/StipendApp
+rm -rf CGBarStat.app
+mkdir -p CGBarStat.app/Contents/MacOS CGBarStat.app/Contents/Resources
+cp "$BIN_DIR/CGBarStatApp" CGBarStat.app/Contents/MacOS/CGBarStatApp
+cp Support/Info.plist CGBarStat.app/Contents/Info.plist
+cp Support/AppIcon.icns CGBarStat.app/Contents/Resources/AppIcon.icns
+chmod +x CGBarStat.app/Contents/MacOS/CGBarStatApp

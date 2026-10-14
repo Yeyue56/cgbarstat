@@ -1,4 +1,4 @@
-# Stipend
+# CGBarStat
 
 macOS 菜单栏应用。三个状态项从左到右显示 Cursor Models（CM）、Other Models（OM）和 Grok Bot（GB）。每一项上行是简拼，下行是用量百分比。百分比绝对值达到 10 时保留 1 位小数，不足 10 时保留 2 位小数。
 
@@ -13,10 +13,10 @@ macOS 菜单栏应用。三个状态项从左到右显示 Cursor Models（CM）�
 ```bash
 swift test
 scripts/package-app.sh
-open Stipend.app
+open CGBarStat.app
 ```
 
-macOS 26 及更新版本要在「系统设置 → 菜单栏」中允许 Stipend 显示状态项。打包会把 `Support/AppIcon.icns` 放进应用，Finder 里使用这张图标。应用仍然不出现在 Dock。
+macOS 26 及更新版本要在「系统设置 → 菜单栏」中允许 CGBarStat 显示状态项。打包会把 `Support/AppIcon.icns` 放进应用，Finder 里使用这张图标。应用仍然不出现在 Dock。
 
 ## 数据来源
 

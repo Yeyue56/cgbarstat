@@ -1,5 +1,5 @@
 import XCTest
-@testable import StipendCore
+@testable import CGBarStatCore
 
 final class HoverSessionTests: XCTestCase {
     private let t0 = Date(timeIntervalSince1970: 1_000)

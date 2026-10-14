@@ -1,5 +1,5 @@
 import Foundation
-import StipendCore
+import CGBarStatCore
 
 /// 拒绝重定向，避免令牌被送到 api2.cursor.sh 以外的主机。
 final class RefuseRedirects: NSObject, URLSessionTaskDelegate, @unchecked Sendable {

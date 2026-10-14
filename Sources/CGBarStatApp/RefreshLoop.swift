@@ -1,6 +1,6 @@
 import AppKit
 import Foundation
-import StipendCore
+import CGBarStatCore
 
 @MainActor
 final class RefreshLoop {

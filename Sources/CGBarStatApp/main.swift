@@ -1,9 +1,9 @@
 import AppKit
-import StipendCore
+import CGBarStatCore
 
 /// LSUIElement 与 accessory 同时设置，应用不进入 Dock。
 @main
-enum StipendMain {
+enum CGBarStatMain {
     @MainActor
     private static var delegate: AppDelegate?
 

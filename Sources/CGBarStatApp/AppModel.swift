@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import StipendCore
+import CGBarStatCore
 
 @MainActor
 @Observable

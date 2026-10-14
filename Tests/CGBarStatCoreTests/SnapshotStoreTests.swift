@@ -1,9 +1,9 @@
 import XCTest
-@testable import StipendCore
+@testable import CGBarStatCore
 
 final class SnapshotStoreTests: XCTestCase {
     func testRoundTripMarksLoadedSnapshotStale() throws {
-        let suite = "stipend.tests.\(UUID().uuidString)"
+        let suite = "cgbarstat.tests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defaults.removePersistentDomain(forName: suite)
         let store = UserDefaultsSnapshotStore(defaults: defaults)

@@ -1,5 +1,5 @@
 import AppKit
-import StipendCore
+import CGBarStatCore
 import SwiftUI
 
 @MainActor

@@ -1,5 +1,5 @@
 import XCTest
-@testable import StipendCore
+@testable import CGBarStatCore
 
 final class UsageDisplayTests: XCTestCase {
     func testSignedOutKeepsThreeAbbreviations() {

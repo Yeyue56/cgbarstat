@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleName</key>
-  <string>Stipend</string>
+  <string>CGBarStat</string>
   <key>CFBundleDisplayName</key>
-  <string>Stipend</string>
+  <string>CGBarStat</string>
   <key>CFBundleIdentifier</key>
-  <string>dev.stipend.mac</string>
+  <string>dev.cgbarstat.mac</string>
   <key>CFBundleVersion</key>
   <string>1</string>
   <key>CFBundleShortVersionString</key>
@@ -15,7 +15,7 @@
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleExecutable</key>
-  <string>StipendApp</string>
+  <string>CGBarStatApp</string>
   <key>CFBundleIconFile</key>
   <string>AppIcon</string>
   <key>LSMinimumSystemVersion</key>

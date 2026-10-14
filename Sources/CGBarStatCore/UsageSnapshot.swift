@@ -91,6 +91,6 @@ public struct PeriodPercents: Equatable, Sendable {
     }
 }
 
-public enum StipendCoreMarker {
-    public static let productName = "Stipend"
+public enum CGBarStatCoreMarker {
+    public static let productName = "CGBarStat"
 }

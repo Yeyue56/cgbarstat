@@ -10,7 +10,7 @@ public protocol SnapshotPersisting: Sendable {
  * UserDefaults 读写是线程安全的；快照没有令牌，因此标记为非检查 Sendable。
  */
 public struct UserDefaultsSnapshotStore: SnapshotPersisting, @unchecked Sendable {
-    public static let key = "stipend.lastSnapshot"
+    public static let key = "cgbarstat.lastSnapshot"
     private let defaults: UserDefaults
 
     public init(defaults: UserDefaults = .standard) {

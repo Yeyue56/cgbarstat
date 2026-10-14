@@ -2,21 +2,21 @@
 import PackageDescription
 
 let package = Package(
-    name: "Stipend",
+    name: "CGBarStat",
     platforms: [.macOS(.v14)],
     products: [
-        .library(name: "StipendCore", targets: ["StipendCore"]),
-        .executable(name: "StipendApp", targets: ["StipendApp"]),
+        .library(name: "CGBarStatCore", targets: ["CGBarStatCore"]),
+        .executable(name: "CGBarStatApp", targets: ["CGBarStatApp"]),
     ],
     targets: [
-        .target(name: "StipendCore"),
+        .target(name: "CGBarStatCore"),
         .executableTarget(
-            name: "StipendApp",
-            dependencies: ["StipendCore"]
+            name: "CGBarStatApp",
+            dependencies: ["CGBarStatCore"]
         ),
         .testTarget(
-            name: "StipendCoreTests",
-            dependencies: ["StipendCore"]
+            name: "CGBarStatCoreTests",
+            dependencies: ["CGBarStatCore"]
         ),
     ]
 )
