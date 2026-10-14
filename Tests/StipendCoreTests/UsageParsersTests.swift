@@ -7,8 +7,8 @@ final class UsageParsersTests: XCTestCase {
         {"billingCycleStart":"2026-04-02T00:00:00Z","planUsage":{"autoPercentUsed":62.4,"apiPercentUsed":"2.6"}}
         """.data(using: .utf8)!
         let parsed = try PeriodPercentParser.parse(json)
-        XCTAssertEqual(parsed.cursorPercent, 62)
-        XCTAssertEqual(parsed.otherPercent, 3)
+        XCTAssertEqual(parsed.cursorPercent ?? -1, 62.4, accuracy: 0.000_001)
+        XCTAssertEqual(parsed.otherPercent ?? -1, 2.6, accuracy: 0.000_001)
         XCTAssertNotNil(parsed.periodStart)
     }
 
@@ -72,7 +72,7 @@ final class UsageParsersTests: XCTestCase {
         let json = #"{"usagePercent":46.2,"nextResetTimestampUtc":"1760000000000","hasNonZeroIncludedLimit":true}"#.data(using: .utf8)!
         let usage = try SandUsageParser.parse(json)
         XCTAssertEqual(usage.allowance, .included)
-        XCTAssertEqual(usage.percent, 46)
+        XCTAssertEqual(usage.percent ?? -1, 46.2, accuracy: 0.000_001)
         XCTAssertEqual(usage.resetAt, Date(timeIntervalSince1970: 1_760_000_000))
     }
 

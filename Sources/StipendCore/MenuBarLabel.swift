@@ -1,5 +1,37 @@
 import Foundation
 
+/// 百分比文案。绝对值四舍五入到百分位后达到 10，则保留 1 位小数；否则保留 2 位。末尾 0 保留。
+public enum PercentText {
+    public static func format(_ value: Double) -> String {
+        guard value.isFinite else { return "—" }
+        let sign = value < 0 ? "-" : ""
+        let magnitude = abs(value)
+        let hundredths = rounded(magnitude, places: 2)
+        if hundredths >= 10 {
+            return sign + render(rounded(magnitude, places: 1), places: 1) + "%"
+        }
+        return sign + render(hundredths, places: 2) + "%"
+    }
+
+    private static func rounded(_ value: Double, places: Int) -> Decimal {
+        var input = Decimal(string: String(value)) ?? Decimal(value)
+        var output = Decimal()
+        NSDecimalRound(&output, &input, places, .plain)
+        return output
+    }
+
+    private static func render(_ value: Decimal, places: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = places
+        formatter.maximumFractionDigits = places
+        formatter.roundingMode = .halfUp
+        formatter.usesGroupingSeparator = false
+        return formatter.string(from: value as NSDecimalNumber) ?? "0"
+    }
+}
+
 /// 以 1000 进位格式化 Tokens。四舍五入到一位小数；结果达到 1000 时升到下一单位。
 public enum TokenQuantity {
     public static func format(_ count: Int) -> String {
@@ -64,7 +96,7 @@ public enum MenuBarLabel {
         item(abbreviation: "GB", percent: snapshot.grokBot.percent, name: "Grok Bot")
     }
 
-    public static func item(abbreviation: String, percent: Int?, name: String) -> StatusItemLabel {
+    public static func item(abbreviation: String, percent: Double?, name: String) -> StatusItemLabel {
         guard let percent else {
             return StatusItemLabel(
                 abbreviation: abbreviation,
@@ -72,10 +104,11 @@ public enum MenuBarLabel {
                 accessibilityText: "\(name) 无数据"
             )
         }
+        let text = PercentText.format(percent)
         return StatusItemLabel(
             abbreviation: abbreviation,
-            percentText: "\(percent)%",
-            accessibilityText: "\(name) \(percent)%"
+            percentText: text,
+            accessibilityText: "\(name) \(text)"
         )
     }
 }
@@ -122,16 +155,16 @@ public struct PoolPanelModel: Equatable, Sendable {
 public enum PoolPanelCopy {
     /// 模型行按本期 Tokens 从高到低。占比分母是本池本期 Tokens，不是额度上限。
     public static func make(pool: ModelPool, isStale: Bool) -> PoolPanelModel {
-        let percentText = pool.percent.map { "\($0)%" } ?? "—"
+        let percentText = pool.percent.map(PercentText.format) ?? "—"
         let periodText = pool.periodTokens.map(TokenQuantity.format) ?? "—"
         let todayText = pool.todayTokens.map(TokenQuantity.format) ?? "—"
         let todayShare: String
         if let today = pool.todayTokens, let period = pool.periodTokens {
             if period > 0 {
-                let percent = Int((Double(today) / Double(period) * 100).rounded())
-                todayShare = "今日 \(percent)%"
+                let percent = Double(today) / Double(period) * 100
+                todayShare = "今日 \(PercentText.format(percent))"
             } else {
-                todayShare = "今日 0%"
+                todayShare = "今日 \(PercentText.format(0))"
             }
         } else {
             todayShare = "今日 —"
@@ -157,11 +190,11 @@ public enum PoolPanelCopy {
             }
             .map { model in
                 let fraction = min(1, max(0, Double(model.tokens) / Double(periodTokens)))
-                let percent = Int((Double(model.tokens) / Double(periodTokens) * 100).rounded())
+                let percent = Double(model.tokens) / Double(periodTokens) * 100
                 return ModelRow(
                     name: model.name,
                     fraction: fraction,
-                    percentText: "\(percent)%",
+                    percentText: PercentText.format(percent),
                     tokensText: TokenQuantity.format(model.tokens)
                 )
             }
@@ -208,7 +241,7 @@ public enum GrokPanelCopy {
             )
         }
         return GrokPanelModel(
-            percentText: usage.percent.map { "\($0)%" } ?? "—",
+            percentText: usage.percent.map(PercentText.format) ?? "—",
             resetText: ResetCountdown.text(now: now, resetAt: usage.resetAt),
             allowanceText: nil,
             staleText: isStale ? "数据已过期" : nil

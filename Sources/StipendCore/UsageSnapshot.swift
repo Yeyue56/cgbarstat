@@ -17,13 +17,13 @@ public struct ModelUsage: Equatable, Sendable, Codable {
 
 public struct ModelPool: Equatable, Sendable, Codable {
     /// 额度百分比。nil 表示这次没有可读百分比，状态栏下行显示 —。
-    public var percent: Int?
+    public var percent: Double?
     /// 本期 Tokens。nil 表示聚合请求没有成功，不把 nil 显示成 0。
     public var periodTokens: Int?
     public var todayTokens: Int?
     public var models: [ModelUsage]
 
-    public init(percent: Int?, periodTokens: Int?, todayTokens: Int?, models: [ModelUsage]) {
+    public init(percent: Double?, periodTokens: Int?, todayTokens: Int?, models: [ModelUsage]) {
         self.percent = percent
         self.periodTokens = periodTokens
         self.todayTokens = todayTokens
@@ -41,11 +41,11 @@ public enum GrokAllowance: String, Equatable, Sendable, Codable {
 
 public struct GrokBotUsage: Equatable, Sendable, Codable {
     public var allowance: GrokAllowance
-    public var percent: Int?
+    public var percent: Double?
     /// 只有响应给出 nextResetTimestampUtc 时才有值。不要用周期起点加 7 天填这个字段。
     public var resetAt: Date?
 
-    public init(allowance: GrokAllowance, percent: Int?, resetAt: Date?) {
+    public init(allowance: GrokAllowance, percent: Double?, resetAt: Date?) {
         self.allowance = allowance
         self.percent = percent
         self.resetAt = resetAt
@@ -80,11 +80,11 @@ public struct UsageSnapshot: Equatable, Sendable, Codable {
 }
 
 public struct PeriodPercents: Equatable, Sendable {
-    public var cursorPercent: Int?
-    public var otherPercent: Int?
+    public var cursorPercent: Double?
+    public var otherPercent: Double?
     public var periodStart: Date?
 
-    public init(cursorPercent: Int?, otherPercent: Int?, periodStart: Date?) {
+    public init(cursorPercent: Double?, otherPercent: Double?, periodStart: Date?) {
         self.cursorPercent = cursorPercent
         self.otherPercent = otherPercent
         self.periodStart = periodStart

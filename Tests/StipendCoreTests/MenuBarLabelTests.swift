@@ -23,11 +23,22 @@ final class MenuBarLabelTests: XCTestCase {
     func testStatusItemsUseRoundedPercents() {
         let snapshot = sampleSnapshot(cursor: 62.4, other: 2.6, grok: 46)
         XCTAssertEqual(MenuBarLabel.cursorModels(snapshot).abbreviation, "CM")
-        XCTAssertEqual(MenuBarLabel.cursorModels(snapshot).percentText, "62%")
-        XCTAssertEqual(MenuBarLabel.otherModels(snapshot).percentText, "3%")
+        XCTAssertEqual(MenuBarLabel.cursorModels(snapshot).percentText, "62.4%")
+        XCTAssertEqual(MenuBarLabel.otherModels(snapshot).percentText, "2.60%")
         XCTAssertEqual(MenuBarLabel.grokBot(snapshot).abbreviation, "GB")
-        XCTAssertEqual(MenuBarLabel.grokBot(snapshot).percentText, "46%")
-        XCTAssertEqual(MenuBarLabel.cursorModels(snapshot).accessibilityText, "Cursor Models 62%")
+        XCTAssertEqual(MenuBarLabel.grokBot(snapshot).percentText, "46.0%")
+        XCTAssertEqual(MenuBarLabel.cursorModels(snapshot).accessibilityText, "Cursor Models 62.4%")
+    }
+
+    func testPercentKeepsOneDecimalUntilSingleDigits() {
+        XCTAssertEqual(PercentText.format(62.44), "62.4%")
+        XCTAssertEqual(PercentText.format(62.45), "62.5%")
+        XCTAssertEqual(PercentText.format(10), "10.0%")
+        XCTAssertEqual(PercentText.format(9.994), "9.99%")
+        XCTAssertEqual(PercentText.format(9.996), "10.0%")
+        XCTAssertEqual(PercentText.format(2.6), "2.60%")
+        XCTAssertEqual(PercentText.format(0), "0.00%")
+        XCTAssertEqual(PercentText.format(100.26), "100.3%")
     }
 
     func testPoolPanelShowsTodayShareAndModelRows() {
@@ -41,12 +52,12 @@ final class MenuBarLabelTests: XCTestCase {
             ]
         )
         let panel = PoolPanelCopy.make(pool: pool, isStale: false)
-        XCTAssertEqual(panel.percentText, "62%")
+        XCTAssertEqual(panel.percentText, "62.0%")
         XCTAssertEqual(panel.periodTokensText, "10K")
-        XCTAssertEqual(panel.todayShareText, "今日 25%")
+        XCTAssertEqual(panel.todayShareText, "今日 25.0%")
         XCTAssertEqual(panel.todayTokensText, "2.5K")
         XCTAssertEqual(panel.rows.map(\.name), ["claude-sonnet", "gpt-5"])
-        XCTAssertEqual(panel.rows.map(\.percentText), ["75%", "25%"])
+        XCTAssertEqual(panel.rows.map(\.percentText), ["75.0%", "25.0%"])
         XCTAssertEqual(panel.rows.map(\.tokensText), ["7.5K", "2.5K"])
         XCTAssertEqual(panel.rows[0].fraction, 0.75, accuracy: 0.001)
         XCTAssertNil(panel.staleText)
@@ -55,7 +66,7 @@ final class MenuBarLabelTests: XCTestCase {
     func testMissingTokensStayDash() {
         let pool = ModelPool(percent: 10, periodTokens: nil, todayTokens: nil, models: [])
         let panel = PoolPanelCopy.make(pool: pool, isStale: true)
-        XCTAssertEqual(panel.percentText, "10%")
+        XCTAssertEqual(panel.percentText, "10.0%")
         XCTAssertEqual(panel.periodTokensText, "—")
         XCTAssertEqual(panel.todayShareText, "今日 —")
         XCTAssertEqual(panel.todayTokensText, "—")
@@ -83,9 +94,9 @@ final class MenuBarLabelTests: XCTestCase {
 
     private func sampleSnapshot(cursor: Double, other: Double, grok: Double) -> UsageSnapshot {
         UsageSnapshot(
-            cursorModels: ModelPool(percent: Int(cursor.rounded()), periodTokens: nil, todayTokens: nil, models: []),
-            otherModels: ModelPool(percent: Int(other.rounded()), periodTokens: nil, todayTokens: nil, models: []),
-            grokBot: GrokBotUsage(allowance: .included, percent: Int(grok.rounded()), resetAt: nil),
+            cursorModels: ModelPool(percent: cursor, periodTokens: nil, todayTokens: nil, models: []),
+            otherModels: ModelPool(percent: other, periodTokens: nil, todayTokens: nil, models: []),
+            grokBot: GrokBotUsage(allowance: .included, percent: grok, resetAt: nil),
             fetchedAt: Date(timeIntervalSince1970: 10),
             cursorStale: false,
             grokStale: false

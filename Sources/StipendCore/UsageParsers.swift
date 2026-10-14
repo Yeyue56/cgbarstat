@@ -1,5 +1,10 @@
 import Foundation
 
+/// 非有限值不进入快照。展示小数位由 PercentText 决定，这里保留原始数值。
+private func finitePercent(_ value: Double) -> Double? {
+    value.isFinite ? value : nil
+}
+
 public enum PeriodUsageParserError: Error, Equatable {
     case unrecognized
 }
@@ -16,18 +21,13 @@ public enum PeriodPercentParser {
             throw PeriodUsageParserError.unrecognized
         }
         let usage = CursorJSON.dictionary(root, key: "planUsage") ?? root
-        let cursor = CursorJSON.firstDouble(usage, keys: ["autoPercentUsed"]).flatMap(roundedPercent)
-        let other = CursorJSON.firstDouble(usage, keys: ["apiPercentUsed"]).flatMap(roundedPercent)
+        let cursor = CursorJSON.firstDouble(usage, keys: ["autoPercentUsed"]).flatMap(finitePercent)
+        let other = CursorJSON.firstDouble(usage, keys: ["apiPercentUsed"]).flatMap(finitePercent)
         guard cursor != nil || other != nil else {
             throw PeriodUsageParserError.unrecognized
         }
         let start = CursorJSON.firstTimestamp(root, keys: ["billingCycleStart"])
         return PeriodPercents(cursorPercent: cursor, otherPercent: other, periodStart: start)
-    }
-
-    private static func roundedPercent(_ value: Double) -> Int? {
-        guard value.isFinite else { return nil }
-        return Int(value.rounded())
     }
 }
 
@@ -69,8 +69,8 @@ public enum PoolAssembler {
     public static func assemble(
         period: [ModelUsage],
         today: [ModelUsage],
-        cursorPercent: Int?,
-        otherPercent: Int?
+        cursorPercent: Double?,
+        otherPercent: Double?
     ) -> (cursor: ModelPool, other: ModelPool) {
         let periodCursor = belonging(period, to: .cursorModels)
         let periodOther = belonging(period, to: .otherModels)
@@ -108,10 +108,7 @@ public enum SandUsageParser {
         }
         let pooled = CursorJSON.bool(root, key: "usesPooledEnterpriseAllowance")
         let hasLimit = CursorJSON.bool(root, key: "hasNonZeroIncludedLimit")
-        let percent = CursorJSON.firstDouble(root, keys: ["usagePercent"]).flatMap { value -> Int? in
-            guard value.isFinite else { return nil }
-            return Int(value.rounded())
-        }
+        let percent = CursorJSON.firstDouble(root, keys: ["usagePercent"]).flatMap(finitePercent)
         if pooled == nil && hasLimit == nil && percent == nil {
             throw PeriodUsageParserError.unrecognized
         }
