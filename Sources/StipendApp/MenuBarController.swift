@@ -103,6 +103,7 @@ final class MenuBarController: NSObject {
             scheduleTick(for: shown)
         } else if panel.isVisible {
             panel.orderOut(nil)
+            NameTooltipController.shared.hide()
             removeOutsideMonitor()
             visibleMeter = nil
         }
@@ -192,6 +193,7 @@ final class MenuBarController: NSObject {
 
     @objc(mouseExited:)
     func mouseExited(with event: NSEvent) {
+        NameTooltipController.shared.hide()
         guard let visibleMeter else { return }
         model.send(visibleMeter, .pointerExitedPanel(Date()))
     }
