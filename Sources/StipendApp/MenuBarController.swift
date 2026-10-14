@@ -72,6 +72,10 @@ final class MenuBarController: NSObject {
         view.onExited = { [weak self] in self?.model.send(meter, .pointerExitedItem(Date())) }
         view.onClick = { [weak self] in self?.model.send(meter, .clickItem) }
         button?.addSubview(view)
+        // 单击由按钮动作发出。子视图若参与命中测试，会挡住这个动作。
+        button?.target = view
+        button?.action = #selector(TwoLineStatusView.statusClicked(_:))
+        button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
         return StatusEntry(meter: meter, item: item, view: view)
     }
 
@@ -227,11 +231,17 @@ private final class TwoLineStatusView: NSView {
         (abbreviation as NSString).draw(in: abbreviationRect, withAttributes: abbreviationAttributes)
     }
 
-    override func updateTrackingAreas() {
-        super.updateTrackingAreas()
-        for area in trackingAreas { removeTrackingArea(area) }
-        addTrackingArea(NSTrackingArea(
-            rect: bounds,
+    /// 绘制层不接收点击，让 NSStatusBarButton 自己成为命中目标。
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        guard let button = superview as? NSStatusBarButton else { return }
+        let alreadyInstalled = button.trackingAreas.contains { $0.owner as AnyObject === self }
+        guard !alreadyInstalled else { return }
+        // 跟踪区必须挂在状态项按钮上。挂在子视图上时，菜单栏窗口不会送来进入和离开事件。
+        button.addTrackingArea(NSTrackingArea(
+            rect: button.bounds,
             options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
             owner: self,
             userInfo: nil
@@ -241,7 +251,5 @@ private final class TwoLineStatusView: NSView {
     override func mouseEntered(with event: NSEvent) { onEntered() }
     override func mouseExited(with event: NSEvent) { onExited() }
 
-    /// 接下按下事件，避免 NSStatusBarButton 的跟踪把 mouseUp 吃掉，导致单击无法钉住。
-    override func mouseDown(with event: NSEvent) {}
-    override func mouseUp(with event: NSEvent) { onClick() }
+    @objc func statusClicked(_ sender: Any?) { onClick() }
 }
