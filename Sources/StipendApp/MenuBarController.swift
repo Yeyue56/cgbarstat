@@ -102,6 +102,16 @@ final class MenuBarController: NSObject {
             removeOutsideMonitor()
             visibleMeter = nil
         }
+        // pendingShow 还不显示面板，但仍要排 tick，否则 0.18 秒后不会进入 preview。
+        if shown == nil {
+            let waiting = MeterOrder.visualOrder.first { meter in
+                if case .pendingShow = model.phases[meter] { return true }
+                return false
+            }
+            if let waiting {
+                scheduleTick(for: waiting)
+            }
+        }
     }
 
     private func scheduleTick(for meter: Meter) {
@@ -230,5 +240,8 @@ private final class TwoLineStatusView: NSView {
 
     override func mouseEntered(with event: NSEvent) { onEntered() }
     override func mouseExited(with event: NSEvent) { onExited() }
+
+    /// 接下按下事件，避免 NSStatusBarButton 的跟踪把 mouseUp 吃掉，导致单击无法钉住。
+    override func mouseDown(with event: NSEvent) {}
     override func mouseUp(with event: NSEvent) { onClick() }
 }
