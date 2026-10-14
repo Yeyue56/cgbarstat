@@ -58,11 +58,13 @@ enum CursorJSON {
         return Date(timeIntervalSince1970: value)
     }
 
+    /// JSON 数字 0 和 1 不能当成布尔值丢掉，只有 JSON 布尔值才返回 nil。
     private static func asDouble(_ value: Any) -> Double? {
-        if value is Bool || value is NSNull { return nil }
-        if let int = value as? Int { return Double(int) }
-        if let double = value as? Double, double.isFinite { return double }
+        if value is NSNull { return nil }
         if let number = value as? NSNumber {
+            if CFGetTypeID(number) == CFBooleanGetTypeID() {
+                return nil
+            }
             let double = number.doubleValue
             return double.isFinite ? double : nil
         }

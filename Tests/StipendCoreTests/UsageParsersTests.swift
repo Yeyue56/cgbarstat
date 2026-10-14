@@ -96,4 +96,31 @@ final class UsageParsersTests: XCTestCase {
             XCTAssertEqual(error as? PeriodUsageParserError, .unrecognized)
         }
     }
+
+    func testPeriodPercentsAcceptZeroAndOneAsNumbers() throws {
+        let json = #"{"planUsage":{"autoPercentUsed":0,"apiPercentUsed":1}}"#.data(using: .utf8)!
+        let parsed = try PeriodPercentParser.parse(json)
+        XCTAssertEqual(parsed.cursorPercent, 0)
+        XCTAssertEqual(parsed.otherPercent, 1)
+    }
+
+    func testPeriodRejectsBooleanPercentAsUnrecognized() {
+        let json = #"{"planUsage":{"autoPercentUsed":true}}"#.data(using: .utf8)!
+        XCTAssertThrowsError(try PeriodPercentParser.parse(json)) { error in
+            XCTAssertEqual(error as? PeriodUsageParserError, .unrecognized)
+        }
+    }
+
+    func testAggregationCountsInputTokenOne() throws {
+        let json = #"{"aggregations":[{"modelIntent":"composer-2.5","inputTokens":1}]}"#.data(using: .utf8)!
+        let models = try AggregationParser.models(json)
+        XCTAssertEqual(models.first { $0.name == "composer-2.5" }?.tokens, 1)
+    }
+
+    func testSandUsageAcceptsZeroPercent() throws {
+        let json = #"{"usagePercent":0,"hasNonZeroIncludedLimit":true}"#.data(using: .utf8)!
+        let usage = try SandUsageParser.parse(json)
+        XCTAssertEqual(usage.allowance, .included)
+        XCTAssertEqual(usage.percent, 0)
+    }
 }
