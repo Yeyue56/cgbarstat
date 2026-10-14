@@ -243,10 +243,25 @@ final class NameTooltipController {
         label.textColor = .labelColor
         panel.contentView?.layer?.backgroundColor = NSColor.textBackgroundColor.cgColor
         panel.contentView?.layer?.borderColor = NSColor.separatorColor.cgColor
-        let singleLine = (text as NSString).size(withAttributes: [.font: font])
-        let textWidth = min(360, ceil(singleLine.width))
-        label.preferredMaxLayoutWidth = textWidth
-        let textHeight = ceil(label.cell?.cellSize(forBounds: NSRect(x: 0, y: 0, width: textWidth, height: 800)).height ?? singleLine.height)
+        // 换行框若按字符串宽度排版，最后一枚字形会掉到下一行。放得下时改为单行，并留出余量。
+        label.cell?.wraps = false
+        label.lineBreakMode = .byClipping
+        label.maximumNumberOfLines = 1
+        label.preferredMaxLayoutWidth = 0
+        let fitted = label.cell?.cellSize(forBounds: NSRect(x: 0, y: 0, width: 10_000, height: 400))
+            ?? (text as NSString).size(withAttributes: [.font: font])
+        var textWidth = ceil(fitted.width)
+        var textHeight = ceil(fitted.height)
+        if textWidth > 360 {
+            label.cell?.wraps = true
+            label.lineBreakMode = .byCharWrapping
+            label.maximumNumberOfLines = 0
+            label.preferredMaxLayoutWidth = 360
+            textWidth = 360
+            textHeight = ceil(label.cell?.cellSize(forBounds: NSRect(x: 0, y: 0, width: 360, height: 800)).height ?? textHeight)
+        } else {
+            textWidth += 1
+        }
         let size = NSSize(width: textWidth + 16, height: textHeight + 8)
         label.frame = NSRect(x: 8, y: 4, width: textWidth, height: textHeight)
         panel.contentView?.frame = NSRect(origin: .zero, size: size)
