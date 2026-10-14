@@ -16,7 +16,7 @@ scripts/package-app.sh
 open Stipend.app
 ```
 
-macOS 26 及更新版本要在「系统设置 → 菜单栏」中允许 Stipend 显示状态项。
+macOS 26 及更新版本要在「系统设置 → 菜单栏」中允许 Stipend 显示状态项。打包会把 `Support/AppIcon.icns` 放进应用，Finder 里使用这张图标。应用仍然不出现在 Dock。
 
 ## 数据来源
 
