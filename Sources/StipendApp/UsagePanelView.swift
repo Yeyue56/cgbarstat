@@ -1,3 +1,4 @@
+import AppKit
 import StipendCore
 import SwiftUI
 
@@ -48,7 +49,7 @@ struct UsagePanelView: View {
             .font(.body)
             ForEach(Array(model.rows.enumerated()), id: \.offset) { _, row in
                 HStack(spacing: 8) {
-                    Text(row.name).lineLimit(1).frame(maxWidth: 110, alignment: .leading)
+                    ModelNameLabel(name: row.name)
                     ProgressBar(fraction: row.fraction)
                     Text(row.percentText).frame(width: 44, alignment: .trailing)
                     Text(row.tokensText).frame(width: 56, alignment: .trailing)
@@ -74,6 +75,31 @@ struct UsagePanelView: View {
                 Text(stale).font(.caption).foregroundStyle(.secondary)
             }
         }
+    }
+}
+
+/// 名称超出 110pt 时尾部省略，并在悬停时用 tooltip 显示全文。未省略的名称不提供 tooltip。
+private struct ModelNameLabel: View {
+    var name: String
+    private let maxWidth: CGFloat = 110
+
+    var body: some View {
+        let label = Text(name)
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .frame(maxWidth: maxWidth, alignment: .leading)
+        if Self.isTruncated(name) {
+            label.help(name)
+        } else {
+            label
+        }
+    }
+
+    private static func isTruncated(_ name: String) -> Bool {
+        let base = NSFont.preferredFont(forTextStyle: .callout)
+        let font = NSFont.monospacedDigitSystemFont(ofSize: base.pointSize, weight: .regular)
+        let width = (name as NSString).size(withAttributes: [.font: font]).width
+        return width > 110
     }
 }
 

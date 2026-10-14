@@ -79,9 +79,21 @@ final class MenuBarLabelTests: XCTestCase {
         XCTAssertEqual(ResetCountdown.text(now: now, resetAt: nil), "重置时间未知")
         XCTAssertEqual(ResetCountdown.text(now: now, resetAt: now.addingTimeInterval(-5)), "0分钟")
         XCTAssertEqual(ResetCountdown.text(now: now, resetAt: now.addingTimeInterval(30)), "1分钟")
-        XCTAssertEqual(ResetCountdown.text(now: now, resetAt: now.addingTimeInterval(90 * 60)), "0天1小时")
+        XCTAssertEqual(ResetCountdown.text(now: now, resetAt: now.addingTimeInterval(90 * 60)), "90分钟")
+        XCTAssertEqual(ResetCountdown.text(now: now, resetAt: now.addingTimeInterval(23 * 3600)), "1380分钟")
+        XCTAssertEqual(ResetCountdown.text(now: now, resetAt: now.addingTimeInterval(24 * 3600)), "1天0小时")
         XCTAssertEqual(ResetCountdown.text(now: now, resetAt: now.addingTimeInterval(26 * 3600)), "1天2小时")
         XCTAssertEqual(ResetCountdown.text(now: now, resetAt: now.addingTimeInterval(59 * 60)), "59分钟")
+    }
+
+    func testGrokPanelAppendsResetSuffix() {
+        let now = Date(timeIntervalSince1970: 1_000_000)
+        let soon = GrokBotUsage(allowance: .included, percent: 46, resetAt: now.addingTimeInterval(90 * 60))
+        XCTAssertEqual(GrokPanelCopy.make(usage: soon, now: now, isStale: false).resetText, "90分钟后重置")
+        let later = GrokBotUsage(allowance: .included, percent: 46, resetAt: now.addingTimeInterval(26 * 3600))
+        XCTAssertEqual(GrokPanelCopy.make(usage: later, now: now, isStale: false).resetText, "1天2小时后重置")
+        let unknown = GrokBotUsage(allowance: .included, percent: 12, resetAt: nil)
+        XCTAssertEqual(GrokPanelCopy.make(usage: unknown, now: now, isStale: false).resetText, "重置时间未知")
     }
 
     func testGrokPanelWithoutAllowance() {

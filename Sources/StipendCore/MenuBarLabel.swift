@@ -202,12 +202,12 @@ public enum PoolPanelCopy {
 }
 
 public enum ResetCountdown {
-    /// 剩余时间不足 1 小时时只显示分钟；否则显示天和小时，天数可以为 0。
+    /// 不足 1 天时向上取整为分钟；达到 1 天时显示天和小时，天数可以为 1 以上，小时是余数。
     public static func text(now: Date, resetAt: Date?) -> String {
         guard let resetAt else { return "重置时间未知" }
         let remaining = resetAt.timeIntervalSince(now)
         if remaining <= 0 { return "0分钟" }
-        if remaining < 3600 {
+        if remaining < 24 * 3600 {
             let minutes = max(1, Int((remaining / 60).rounded(.up)))
             return "\(minutes)分钟"
         }
@@ -242,9 +242,16 @@ public enum GrokPanelCopy {
         }
         return GrokPanelModel(
             percentText: usage.percent.map(PercentText.format) ?? "—",
-            resetText: ResetCountdown.text(now: now, resetAt: usage.resetAt),
+            resetText: resetLine(now: now, resetAt: usage.resetAt),
             allowanceText: nil,
             staleText: isStale ? "数据已过期" : nil
         )
+    }
+
+    /// 有重置时刻时在时间后加上「后重置」。没有时间戳时保持「重置时间未知」。
+    private static func resetLine(now: Date, resetAt: Date?) -> String {
+        let countdown = ResetCountdown.text(now: now, resetAt: resetAt)
+        guard resetAt != nil else { return countdown }
+        return countdown + "后重置"
     }
 }
