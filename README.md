@@ -2,7 +2,27 @@
 
 macOS 菜单栏应用。三个状态项从左到右显示 Cursor Models（CM）、Other Models（OM）和 Grok Bot（GB）。每一项上行是简拼，下行是用量百分比。百分比绝对值达到 10 时保留 1 位小数，不足 10 时保留 2 位小数。
 
-<video src="https://github.com/user-attachments/assets/8cb91931-30fa-4d20-aa16-124bf4477cc6" controls></video>
+## 界面
+
+菜单栏从左到右是 CM、OM、GB。下图中这三项是 CGBarStat，电量和天气属于系统菜单栏。
+
+![菜单栏中的 CM、OM、GB](docs/screenshots/menu-bar.png)
+
+悬停 CM 打开 Cursor Models。第一行是额度百分比和本期 Tokens，第二行是今日 Tokens 占本期 Tokens 的比例和今日 Tokens，之后每行是一个模型的进度条、占比和 Tokens。
+
+![Cursor Models 悬浮窗](docs/screenshots/cursor-models.png)
+
+悬停 OM 打开 Other Models，版式与 CM 相同。模型名在忽略大小写后包含 `composer`、`grok` 或 `cursor`，或者等于 `auto`、以 `auto-` 开头时归入 CM，其余归入 OM。图中的 `github_bugbot` 和 `default` 因此显示在 OM。
+
+![Other Models 悬浮窗](docs/screenshots/other-models.png)
+
+悬停 GB 打开 Grok Bot。悬浮窗只有百分比和距离下次重置的时间。达到一天时显示天和小时，后面加上「后重置」。
+
+![Grok Bot 悬浮窗](docs/screenshots/grok-bot.png)
+
+模型名超出宽度时尾部省略。悬停被省略的名称会显示完整名称。
+
+![悬停显示完整模型名](docs/screenshots/model-name-tooltip.png)
 
 ## 环境
 
@@ -40,9 +60,7 @@ macOS 26 及更新版本要在「系统设置 → 菜单栏」中允许 CGBarSta
 
 ## 状态栏与悬浮窗
 
-状态项按 GB、OM、CM 的顺序创建，使视觉顺序从左到右为 CM、OM、GB。
-
-CM 与 OM 的悬浮窗第一行是额度百分比和本期 Tokens，第二行是今日 Tokens 占本期 Tokens 的比例和今日 Tokens，之后每行是一个模型的进度条、占比和 Tokens。模型名超出宽度时尾部省略，悬停被省略的名称会显示完整名称。GB 的悬浮窗只有百分比和距离下次重置的时间。不足一天时是小时和分钟，达到一天时是天和小时，时间后面加上「后重置」。没有重置时间戳时仍显示「重置时间未知」。
+状态项按 GB、OM、CM 的顺序创建，使视觉顺序从左到右为 CM、OM、GB。版式见上文界面一节。不足一天时重置时间是小时和分钟，达到一天时是天和小时。没有重置时间戳时显示「重置时间未知」。
 
 ## 刷新
 
