@@ -16,7 +16,9 @@ scripts/package-app.sh
 open CGBarStat.app
 ```
 
-macOS 26 及更新版本要在「系统设置 → 菜单栏」中允许 CGBarStat 显示状态项。打包会把 `Support/AppIcon.icns` 放进应用，Finder 里使用这张图标。应用仍然不出现在 Dock。
+macOS 26 及更新版本要在「系统设置 → 菜单栏」中允许 CGBarStat 显示状态项。应用仍然不出现在 Dock。
+
+`scripts/package-app.sh` 在项目根目录生成 `CGBarStat.app`。可执行文件是 `CGBarStat.app/Contents/MacOS/CGBarStatApp`。应用包按当前机器的架构编译，仓库不收录应用包和 zip。当前构建没有 Apple 公证。收到 zip 的人首次打开时，在 Finder 里按住 Control 点按应用，再选择「打开」。
 
 ## 数据来源
 
@@ -24,7 +26,7 @@ macOS 26 及更新版本要在「系统设置 → 菜单栏」中允许 CGBarSta
 
 `~/Library/Application Support/Cursor/User/globalStorage/state.vscdb`
 
-从 `ItemTable` 读取键 `cursorAuth/accessToken`。令牌只留在内存中。
+从 `ItemTable` 读取键 `cursorAuth/accessToken`。令牌只留在内存中，不写入快照、日志或仓库。用量请求只发往 `https://api2.cursor.sh`，并拒绝重定向。
 
 用量来自 `api2.cursor.sh` 上的：
 
@@ -43,3 +45,7 @@ CM 与 OM 的悬浮窗第一行是额度百分比和本期 Tokens，第二行是
 ## 刷新
 
 应用启动、每 300 秒、系统唤醒时刷新。面板从隐藏变为显示时，若距离上次成功超过 30 秒，再刷新一次。
+
+## 许可证
+
+本仓库使用 [MIT 许可证](LICENSE)。保留版权声明和许可证文本即可使用、修改和再分发，包括用于闭源软件。软件按原样提供，作者不承担担保责任。
