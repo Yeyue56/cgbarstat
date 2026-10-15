@@ -78,6 +78,10 @@ Status items are created in the order GB, OM, CM, so the visual order from left 
 
 The app refreshes at launch, every 300 seconds, and when the system wakes. When a panel changes from hidden to visible, it refreshes again if the last success was more than 30 seconds ago.
 
+## Community
+
+[LINUX DO](https://linux.do)
+
 ## License
 
 This repository uses the [MIT License](LICENSE). Keep the copyright notice and license text to use, modify, and redistribute the software, including in closed-source software. The software is provided as is, without warranty.
