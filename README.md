@@ -1,10 +1,22 @@
 # CGBarStat
 
+[English](README.en.md)
+
 macOS 菜单栏应用。三个状态项从左到右显示 Cursor Models（CM）、Other Models（OM）和 Grok Bot（GB）。每一项上行是简拼，下行是用量百分比。百分比绝对值达到 10 时保留 1 位小数，不足 10 时保留 2 位小数。
+
+## 下载
+
+当前版本是 [0.1.0](https://github.com/Yeyue56/cgbarstat/releases/tag/v0.1.0)，适用于 macOS 14 及以上的 Apple 芯片 Mac。
+
+[下载 CGBarStat-0.1.0-arm64.zip](https://github.com/Yeyue56/cgbarstat/releases/download/v0.1.0/CGBarStat-0.1.0-arm64.zip)
+
+其余版本在 [Releases](https://github.com/Yeyue56/cgbarstat/releases)。
+
+下载后解压得到 `CGBarStat.app`。当前构建没有 Apple 公证。首次打开时，在 Finder 里按住 Control 点按应用，再选择「打开」。macOS 26 及更新版本要在「系统设置 → 菜单栏」中允许 CGBarStat 显示状态项。应用不出现在 Dock。使用前本机需已安装并登录 Cursor。
 
 ## 界面
 
-菜单栏从左到右是 CM、OM、GB。下图中这三项是 CGBarStat，电量和天气属于系统菜单栏。
+菜单栏从左到右是 CM、OM、GB。下图中这三项是 CGBarStat。
 
 ![菜单栏中的 CM、OM、GB](docs/screenshots/menu-bar.png)
 
@@ -27,10 +39,12 @@ macOS 菜单栏应用。三个状态项从左到右显示 Cursor Models（CM）�
 ## 环境
 
 - macOS 14 或更新版本
+- Apple 芯片
 - 本机已安装并登录 Cursor
-- Swift 6 工具链
 
 ## 构建与运行
+
+从源码构建需要 Swift 6 工具链。
 
 ```bash
 swift test
@@ -38,9 +52,7 @@ scripts/package-app.sh
 open CGBarStat.app
 ```
 
-macOS 26 及更新版本要在「系统设置 → 菜单栏」中允许 CGBarStat 显示状态项。应用仍然不出现在 Dock。
-
-`scripts/package-app.sh` 在项目根目录生成 `CGBarStat.app`。可执行文件是 `CGBarStat.app/Contents/MacOS/CGBarStatApp`。应用包按当前机器的架构编译，仓库不收录应用包和 zip。当前构建没有 Apple 公证。收到 zip 的人首次打开时，在 Finder 里按住 Control 点按应用，再选择「打开」。
+`scripts/package-app.sh` 在项目根目录生成 `CGBarStat.app`。可执行文件是 `CGBarStat.app/Contents/MacOS/CGBarStatApp`。应用包按当前机器的架构编译。仓库不收录应用包和 zip，打包文件发布在 [Releases](https://github.com/Yeyue56/cgbarstat/releases)。
 
 ## 数据来源
 
