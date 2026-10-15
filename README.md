@@ -2,6 +2,8 @@
 
 macOS 菜单栏应用。三个状态项从左到右显示 Cursor Models（CM）、Other Models（OM）和 Grok Bot（GB）。每一项上行是简拼，下行是用量百分比。百分比绝对值达到 10 时保留 1 位小数，不足 10 时保留 2 位小数。
 
+<video src="https://github.com/user-attachments/assets/8cb91931-30fa-4d20-aa16-124bf4477cc6" controls></video>
+
 ## 环境
 
 - macOS 14 或更新版本
