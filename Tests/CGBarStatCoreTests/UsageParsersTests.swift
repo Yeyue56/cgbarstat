@@ -20,6 +20,22 @@ final class UsageParsersTests: XCTestCase {
         XCTAssertNotNil(parsed.periodStart)
     }
 
+    func testPeriodAcceptsCycleEndWithoutPercents() throws {
+        let json = #"{"billingCycleStart":"2026-04-02T00:00:00Z","billingCycleEnd":"2026-05-02T00:00:00Z"}"#.data(using: .utf8)!
+        let parsed = try PeriodPercentParser.parse(json)
+        XCTAssertNil(parsed.cursorPercent)
+        XCTAssertNil(parsed.otherPercent)
+        XCTAssertNotNil(parsed.periodStart)
+        let end = try XCTUnwrap(parsed.periodEnd)
+        XCTAssertGreaterThan(end, parsed.periodStart!)
+    }
+
+    func testPlanInfoReadsNestedCycleEnd() throws {
+        let json = #"{"planInfo":{"planName":"Pro","billingCycleEnd":"1773077797000"}}"#.data(using: .utf8)!
+        let end = try PlanInfoParser.periodEnd(json)
+        XCTAssertEqual(end.timeIntervalSince1970, 1_773_077_797, accuracy: 0.001)
+    }
+
     func testPeriodRejectsObjectWithoutPercents() {
         let json = #"{"planUsage":{"limit":8000}}"#.data(using: .utf8)!
         XCTAssertThrowsError(try PeriodPercentParser.parse(json)) { error in

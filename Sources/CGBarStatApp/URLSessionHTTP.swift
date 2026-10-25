@@ -1,7 +1,7 @@
 import Foundation
 import CGBarStatCore
 
-/// 拒绝重定向，避免令牌被送到 api2.cursor.sh 以外的主机。
+/// 拒绝 URLSession 自动重定向，避免令牌被送到允许名单以外的主机。
 final class RefuseRedirects: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
     func urlSession(
         _ session: URLSession,
@@ -22,6 +22,7 @@ struct URLSessionHTTP: HTTPSending {
         guard let http = response as? HTTPURLResponse else {
             throw UsageClientError.transport
         }
-        return HTTPResponse(statusCode: http.statusCode, data: data)
+        let location = http.value(forHTTPHeaderField: "Location").flatMap { URL(string: $0, relativeTo: request.url)?.absoluteURL }
+        return HTTPResponse(statusCode: http.statusCode, data: data, location: location)
     }
 }

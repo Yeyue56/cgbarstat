@@ -133,6 +133,7 @@ public struct PoolPanelModel: Equatable, Sendable {
     public var todayShareText: String
     public var todayTokensText: String
     public var rows: [ModelRow]
+    public var expiryText: String?
     public var staleText: String?
 
     public init(
@@ -141,6 +142,7 @@ public struct PoolPanelModel: Equatable, Sendable {
         todayShareText: String,
         todayTokensText: String,
         rows: [ModelRow],
+        expiryText: String?,
         staleText: String?
     ) {
         self.percentText = percentText
@@ -148,13 +150,25 @@ public struct PoolPanelModel: Equatable, Sendable {
         self.todayShareText = todayShareText
         self.todayTokensText = todayTokensText
         self.rows = rows
+        self.expiryText = expiryText
         self.staleText = staleText
+    }
+}
+
+public enum PlanExpiry {
+    /// 没有 billingCycleEnd 时不显示。已经到期时不用「0小时0分钟」，以免和仍在计时的套餐混淆。
+    public static func text(now: Date, periodEnd: Date?) -> String? {
+        guard let periodEnd else { return nil }
+        if periodEnd.timeIntervalSince(now) <= 0 {
+            return "套餐已过期"
+        }
+        return ResetCountdown.text(now: now, resetAt: periodEnd) + "后过期"
     }
 }
 
 public enum PoolPanelCopy {
     /// 模型行按本期 Tokens 从高到低。占比分母是本池本期 Tokens，不是额度上限。
-    public static func make(pool: ModelPool, isStale: Bool) -> PoolPanelModel {
+    public static func make(pool: ModelPool, isStale: Bool, now: Date = Date(), periodEnd: Date? = nil) -> PoolPanelModel {
         let percentText = pool.percent.map(PercentText.format) ?? "—"
         let periodText = pool.periodTokens.map(TokenQuantity.format) ?? "—"
         let todayText = pool.todayTokens.map(TokenQuantity.format) ?? "—"
@@ -176,6 +190,7 @@ public enum PoolPanelCopy {
             todayShareText: todayShare,
             todayTokensText: todayText,
             rows: rows,
+            expiryText: PlanExpiry.text(now: now, periodEnd: periodEnd),
             staleText: isStale ? "数据已过期" : nil
         )
     }

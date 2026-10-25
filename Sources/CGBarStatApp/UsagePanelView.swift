@@ -12,6 +12,10 @@ struct UsagePanelView: View {
             switch display {
             case .signedOut:
                 Text("未检测到本机 Cursor 登录")
+            case .loginExpired:
+                Text("本机保存的登录仍被服务器拒绝。请完全退出 Cursor，再从账号菜单退出并重新登录。")
+            case .encryptedLogin:
+                Text("本机 Cursor 登录已加密。请允许 CGBarStat 读取钥匙串项 “Cursor Safe Storage”，允许后会自动刷新。")
             case .unavailable:
                 Text("用量暂时无法更新")
             case .ready(let snapshot):
@@ -19,16 +23,41 @@ struct UsagePanelView: View {
             }
         }
         .padding(14)
-        .frame(width: meter == .grokBot ? 220 : 320, alignment: .leading)
+        .frame(width: panelWidth, alignment: .leading)
+    }
+
+    /// “100.0%” 在当前正文字号下约 45pt。写死 44pt 时百分号会被挤到下一行。
+    private var modelPercentWidth: CGFloat {
+        let font = NSFont.preferredFont(forTextStyle: .callout)
+        let digits = NSFont.monospacedDigitSystemFont(ofSize: font.pointSize, weight: .regular)
+        let width = ("100.0%" as NSString).size(withAttributes: [.font: digits]).width
+        return ceil(width) + 2
+    }
+
+    private var panelWidth: CGFloat {
+        if case .ready = display, meter == .grokBot {
+            return 220
+        }
+        return 320
     }
 
     @ViewBuilder
     private func ready(_ snapshot: UsageSnapshot) -> some View {
         switch meter {
         case .cursorModels:
-            pool(PoolPanelCopy.make(pool: snapshot.cursorModels, isStale: snapshot.cursorStale))
+            pool(PoolPanelCopy.make(
+                pool: snapshot.cursorModels,
+                isStale: snapshot.cursorStale,
+                now: now,
+                periodEnd: snapshot.periodEnd
+            ))
         case .otherModels:
-            pool(PoolPanelCopy.make(pool: snapshot.otherModels, isStale: snapshot.cursorStale))
+            pool(PoolPanelCopy.make(
+                pool: snapshot.otherModels,
+                isStale: snapshot.cursorStale,
+                now: now,
+                periodEnd: snapshot.periodEnd
+            ))
         case .grokBot:
             grok(GrokPanelCopy.make(usage: snapshot.grokBot, now: now, isStale: snapshot.grokStale))
         }
@@ -51,10 +80,15 @@ struct UsagePanelView: View {
                 HStack(spacing: 8) {
                     ModelNameLabel(name: row.name)
                     ProgressBar(fraction: row.fraction)
-                    Text(row.percentText).frame(width: 44, alignment: .trailing)
+                    Text(row.percentText)
+                        .lineLimit(1)
+                        .frame(width: modelPercentWidth, alignment: .trailing)
                     Text(row.tokensText).frame(width: 56, alignment: .trailing)
                 }
                 .font(.callout.monospacedDigit())
+            }
+            if let expiry = model.expiryText {
+                Text(expiry).font(.body)
             }
             if let stale = model.staleText {
                 Text(stale).font(.caption).foregroundStyle(.secondary)

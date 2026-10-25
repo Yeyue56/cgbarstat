@@ -74,6 +74,28 @@ final class MenuBarLabelTests: XCTestCase {
         XCTAssertEqual(panel.staleText, "数据已过期")
     }
 
+    func testPlanExpiryUsesDayHourCountdownUntilItEnds() {
+        let now = Date(timeIntervalSince1970: 1_000_000)
+        XCTAssertNil(PlanExpiry.text(now: now, periodEnd: nil))
+        XCTAssertEqual(PlanExpiry.text(now: now, periodEnd: now), "套餐已过期")
+        XCTAssertEqual(PlanExpiry.text(now: now, periodEnd: now.addingTimeInterval(-1)), "套餐已过期")
+        XCTAssertEqual(PlanExpiry.text(now: now, periodEnd: now.addingTimeInterval(90 * 60)), "1小时30分钟后过期")
+        XCTAssertEqual(PlanExpiry.text(now: now, periodEnd: now.addingTimeInterval(26 * 3600)), "1天2小时后过期")
+    }
+
+    func testPoolPanelShowsPlanExpiry() {
+        let now = Date(timeIntervalSince1970: 1_000_000)
+        let pool = ModelPool(percent: 10, periodTokens: nil, todayTokens: nil, models: [])
+        let panel = PoolPanelCopy.make(
+            pool: pool,
+            isStale: false,
+            now: now,
+            periodEnd: now.addingTimeInterval(26 * 3600)
+        )
+        XCTAssertEqual(panel.expiryText, "1天2小时后过期")
+        XCTAssertNil(panel.staleText)
+    }
+
     func testResetCountdown() {
         let now = Date(timeIntervalSince1970: 1_000_000)
         XCTAssertEqual(ResetCountdown.text(now: now, resetAt: nil), "重置时间未知")

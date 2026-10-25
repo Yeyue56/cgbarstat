@@ -13,7 +13,8 @@ final class SnapshotStoreTests: XCTestCase {
             grokBot: GrokBotUsage(allowance: .included, percent: 46, resetAt: nil),
             fetchedAt: Date(timeIntervalSince1970: 10),
             cursorStale: false,
-            grokStale: false
+            grokStale: false,
+            periodEnd: Date(timeIntervalSince1970: 86_400)
         )
         store.save(snapshot)
         let loaded = try XCTUnwrap(store.load())
@@ -21,6 +22,7 @@ final class SnapshotStoreTests: XCTestCase {
         XCTAssertEqual(loaded.grokBot.percent, 46)
         XCTAssertTrue(loaded.cursorStale)
         XCTAssertTrue(loaded.grokStale)
+        XCTAssertEqual(loaded.periodEnd, Date(timeIntervalSince1970: 86_400))
         let data = try XCTUnwrap(defaults.data(forKey: UserDefaultsSnapshotStore.key))
         let text = String(decoding: data, as: UTF8.self)
         XCTAssertFalse(text.contains("token"))

@@ -15,7 +15,8 @@ public enum ModelPoolKind: Equatable, Sendable {
 }
 
 public enum PeriodPercentParser {
-    /// 至少要读到 auto 或 api 其中一个百分比。缺失的那个保持 nil。
+    /// 百分比和周期边界至少要有一类。只有额度上限、没有百分比也没有周期时拒绝。
+    /// 套餐刚续费或已经到期时，响应可能只有 billingCycleEnd，百分比保持 nil。
     public static func parse(_ data: Data) throws -> PeriodPercents {
         guard let root = CursorJSON.object(data) else {
             throw PeriodUsageParserError.unrecognized
@@ -23,11 +24,29 @@ public enum PeriodPercentParser {
         let usage = CursorJSON.dictionary(root, key: "planUsage") ?? root
         let cursor = CursorJSON.firstDouble(usage, keys: ["autoPercentUsed"]).flatMap(finitePercent)
         let other = CursorJSON.firstDouble(usage, keys: ["apiPercentUsed"]).flatMap(finitePercent)
-        guard cursor != nil || other != nil else {
+        let start = CursorJSON.firstTimestamp(root, keys: ["billingCycleStart"])
+            ?? CursorJSON.firstTimestamp(usage, keys: ["billingCycleStart"])
+        let end = CursorJSON.firstTimestamp(root, keys: ["billingCycleEnd"])
+            ?? CursorJSON.firstTimestamp(usage, keys: ["billingCycleEnd"])
+        guard cursor != nil || other != nil || start != nil || end != nil else {
             throw PeriodUsageParserError.unrecognized
         }
-        let start = CursorJSON.firstTimestamp(root, keys: ["billingCycleStart"])
-        return PeriodPercents(cursorPercent: cursor, otherPercent: other, periodStart: start)
+        return PeriodPercents(cursorPercent: cursor, otherPercent: other, periodStart: start, periodEnd: end)
+    }
+}
+
+public enum PlanInfoParser {
+    /// GetPlanInfo 的周期结束时间在 planInfo.billingCycleEnd。没有结束时间就无法显示套餐期限。
+    public static func periodEnd(_ data: Data) throws -> Date {
+        guard let root = CursorJSON.object(data) else {
+            throw PeriodUsageParserError.unrecognized
+        }
+        let info = CursorJSON.dictionary(root, key: "planInfo") ?? root
+        guard let end = CursorJSON.firstTimestamp(info, keys: ["billingCycleEnd"])
+            ?? CursorJSON.firstTimestamp(root, keys: ["billingCycleEnd"]) else {
+            throw PeriodUsageParserError.unrecognized
+        }
+        return end
     }
 }
 

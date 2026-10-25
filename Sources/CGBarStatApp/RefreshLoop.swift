@@ -17,7 +17,8 @@ final class RefreshLoop {
             guard let self else { return }
             await self.model.refresh(reason: .launch)
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(RefreshPolicy.timerInterval))
+                let wait = RefreshPolicy.timerInterval(for: self.model.display)
+                try? await Task.sleep(for: .seconds(wait))
                 await self.model.refresh(reason: .timer)
             }
         }

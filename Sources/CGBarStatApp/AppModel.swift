@@ -44,37 +44,48 @@ final class AppModel {
         } catch {
             return
         }
-        guard case .token(let token) = session else {
+        let token: String
+        switch session {
+        case .notSignedIn:
             setDisplay(DisplayUpdate.signedOut())
             return
+        case .sealed:
+            setDisplay(.encryptedLogin)
+            return
+        case .token(let value):
+            token = value
         }
+        let refreshToken = try? reader.readRefreshToken()
+        let sessionUserId = try? reader.readSessionUserId()
+        let accessToken = CursorToken.sessionToken(from: token)
+        let usableRefresh = refreshToken.map { CursorToken.sessionToken(from: $0) }
         do {
-            let snapshot = try await client.fetch(token: token, now: now, calendar: .current)
-            lastSuccess = snapshot.fetchedAt
-            let merged = merge(snapshot)
+            let prepared = try await client.fetchPrepared(
+                accessToken: accessToken,
+                refreshToken: usableRefresh,
+                sessionUserId: sessionUserId,
+                now: now,
+                calendar: .current
+            )
+            // 本地拆出来的 JWT 不是服务端新发的令牌，不能写回 Cursor 原来的键。
+            if prepared.accessToken != accessToken || prepared.refreshToken != usableRefresh {
+                try? reader.updateTokens(accessToken: prepared.accessToken, refreshToken: prepared.refreshToken)
+            }
+            lastSuccess = prepared.snapshot.fetchedAt
+            let merged = DisplayUpdate.merged(previous: currentSnapshot ?? store.load(), incoming: prepared.snapshot)
             setDisplay(DisplayUpdate.success(merged))
             store.save(merged)
-        } catch UsageClientError.unauthorized {
-            setDisplay(DisplayUpdate.signedOut())
+        } catch UsageClientError.loginExpired {
+            // 两个令牌都被拒绝。保留旧百分比会一直显示「数据已过期」，但刷新不会成功。
+            setDisplay(.loginExpired)
         } catch {
-            if case .ready(var previous) = display {
-                previous.cursorStale = true
-                previous.grokStale = true
-                setDisplay(.ready(previous))
-            }
+            setDisplay(DisplayUpdate.keepingLastSnapshot(current: display, cached: store.load()))
         }
     }
 
-    /// Grok 这次没有读到时，沿用上一份 Grok，避免一次 Sand 失败把 GB 打成无数据。
-    private func merge(_ incoming: UsageSnapshot) -> UsageSnapshot {
-        guard case .ready(let previous) = display else { return incoming }
-        if incoming.grokStale {
-            var copy = incoming
-            copy.grokBot = previous.grokBot
-            copy.grokStale = true
-            return copy
-        }
-        return incoming
+    private var currentSnapshot: UsageSnapshot? {
+        if case .ready(let snapshot) = display { return snapshot }
+        return nil
     }
 
     private func setDisplay(_ newValue: UsageDisplay) {

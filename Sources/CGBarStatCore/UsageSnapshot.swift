@@ -61,6 +61,8 @@ public struct UsageSnapshot: Equatable, Sendable, Codable {
     public var fetchedAt: Date
     public var cursorStale: Bool
     public var grokStale: Bool
+    /// 套餐周期结束时间，来自 billingCycleEnd。没有该字段时不推断到期日。
+    public var periodEnd: Date?
 
     public init(
         cursorModels: ModelPool,
@@ -68,7 +70,8 @@ public struct UsageSnapshot: Equatable, Sendable, Codable {
         grokBot: GrokBotUsage,
         fetchedAt: Date,
         cursorStale: Bool,
-        grokStale: Bool
+        grokStale: Bool,
+        periodEnd: Date? = nil
     ) {
         self.cursorModels = cursorModels
         self.otherModels = otherModels
@@ -76,6 +79,7 @@ public struct UsageSnapshot: Equatable, Sendable, Codable {
         self.fetchedAt = fetchedAt
         self.cursorStale = cursorStale
         self.grokStale = grokStale
+        self.periodEnd = periodEnd
     }
 }
 
@@ -83,11 +87,13 @@ public struct PeriodPercents: Equatable, Sendable {
     public var cursorPercent: Double?
     public var otherPercent: Double?
     public var periodStart: Date?
+    public var periodEnd: Date?
 
-    public init(cursorPercent: Double?, otherPercent: Double?, periodStart: Date?) {
+    public init(cursorPercent: Double?, otherPercent: Double?, periodStart: Date?, periodEnd: Date? = nil) {
         self.cursorPercent = cursorPercent
         self.otherPercent = otherPercent
         self.periodStart = periodStart
+        self.periodEnd = periodEnd
     }
 }
 
